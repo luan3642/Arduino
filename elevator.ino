@@ -1,3 +1,5 @@
+// Fiz algumas coisinhas 
+
 #include <Adafruit_NeoPixel.h>
 
 enum { INOPERANTE,
@@ -203,10 +205,11 @@ void estado_ESTACIONADO_S() {
 
   if (emergency) {
     emergency = false;
-    openDoor = false;
+    // acredito que nesse estado a porta está aberta
+    openDoor = true;
     estado = ALINHADO_S;
   } else if (currentFloor == demandedFloor) {
-
+      estado = ESTACIONADO_S
   }
 
 
@@ -221,25 +224,123 @@ void estado_FIM_S() {
 
 void estado_ALINHADO_D() {
   Serial.println("==> ALINHADO_D");
-  estado = ESTACIONADO_D;
-  //estado = MOVENDO_D;
-  //estado = FIM_D;
+  if(emergency) {
+    estado = ESTACIONADO_D;
+    return;
+  } else if (hasDemand) {
+    switch (currentFloor) {
+      case 0:
+        estado = MOVENDO_D;
+      case 1:
+        if(demandedFloor == currentFloor) {
+          estado = ESTACIONADO_D;
+        } else if(firstU[1]) {
+          estado = ESTACIONADO_D;
+        } else {
+          estado = MOVENDO_D;
+        }
+        break;
+      case 2:
+        if(demandedFloor == currentFloor) {
+          estado = ESTACIONADO_D;
+        } else if(firstU[2]) {
+          estado = ESTACIONADO_D;
+        } else {
+          estado = MOVENDO_D;
+        }
+        break;
+      case 3:
+        if(demandedFloor == currentFloor) {
+          estado = ESTACIONADO_D;
+        } else if(firstU[3]) {
+          estado = ESTACIONADO_D;
+        } else {
+          estado = MOVENDO_D;
+        }
+        break;
+      case 4:
+        if(demandedFloor == currentFloor) {
+          estado = ESTACIONADO_D;
+        } else if(firstU[4]) {
+          estado = ESTACIONADO_D;
+        } else {
+          estado = MOVENDO_D;
+        }
+        break;
+      case 5:
+        if(demandedFloor == currentFloor) {
+          estado = ESTACIONADO_D;
+        } else if(firstU[5]) {
+          estado = ESTACIONADO_D;
+        } else {
+          estado = MOVENDO_D;
+        }
+        break;
+      case 6:
+        if(demandedFloor == currentFloor) {
+          estado = ESTACIONADO_D;
+        } else if(firstU[6]) {
+          estado = ESTACIONADO_D;
+        } else {
+          estado = MOVENDO_D;
+        }
+        break;
+      case 7:
+        if(demandedFloor == currentFloor) {
+          estado = ESTACIONADO_D;
+        } else if(firstU[7]) {
+          estado = ESTACIONADO_D;
+        } else {
+          estado = MOVENDO_D;
+        }
+        break;
+      case 8:
+        if(demandedFloor == currentFloor) {
+          estado = ESTACIONADO_D;
+        } else if(firstU[8]) {
+          estado = ESTACIONADO_D;
+        } else {
+          estado = MOVENDO_D;
+        }
+        break;
+      case 9:
+        estado = ESTACIONADO_D;
+        break;
+      default:
+        break;
+    }
+  } else {
+      estado = FIM_D;
+  }
 }
 
 void estado_MOVENDO_D() {
-  Serial.println("==> MOVENDO_D");
-  estado = ALINHADO_D;
+  Serial.println("==> MOVENDO_S");
+  currentFloor--;
+  estado = ALINHADO_S;
 }
 
 void estado_ESTACIONADO_D() {
   Serial.println("==> ESTACIONADO_D");
-  estado = ALINHADO_D;
+  openDoor = true;
+
+  if (emergency) {
+    emergency = false;
+    // acredito que nesse estado a porta está aberta
+    openDoor = true;
+    estado = ALINHADO_S;
+  } else if (currentFloor == demandedFloor) {
+      estado = ESTACIONADO_S
+  }
+
+
+  estado = ALINHADO_S;
 }
 
 void estado_FIM_D() {
   Serial.println("==> FIM_D");
   estado = OCIOSO;
-  //estado = ALINHADO_S;
+  //estado = ALINHADO_D;
 }
 
 //-----------------------------------------------------------------

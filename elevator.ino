@@ -91,10 +91,12 @@ void estado_OCIOSO() {
   if(on && hasDemand) {
     if (currentFloor <= demandedFloor) {
       estado = ALINHADO_S;
+      delay(3000);
     } else {
       estado = ALINHADO_D;
+      delay(3000);
     }
-  } else {
+  } else if (!on){
     estado = INOPERANTE;
   }
 }
@@ -102,16 +104,19 @@ void estado_OCIOSO() {
 void estado_ALINHADO_S() {
   Serial.println("==> ALINHADO_S");
   if(emergency) {
+    openDoor = true;
     estado = ESTACIONADO_S;
-    return;
+    delay(3000);
   } else if (hasDemand) {
     switch (currentFloor) {
       case 0:
         estado = MOVENDO_S;
       case 1:
         if(demandedFloor == currentFloor) {
+          openDoor = true;
           estado = ESTACIONADO_S;
         } else if(firstU[1]) {
+          openDoor = true;
           estado = ESTACIONADO_S;
         } else {
           estado = MOVENDO_S;
@@ -119,8 +124,10 @@ void estado_ALINHADO_S() {
         break;
       case 2:
         if(demandedFloor == currentFloor) {
+          openDoor = true;
           estado = ESTACIONADO_S;
         } else if(firstU[2]) {
+          openDoor = true;
           estado = ESTACIONADO_S;
         } else {
           estado = MOVENDO_S;
@@ -128,8 +135,10 @@ void estado_ALINHADO_S() {
         break;
       case 3:
         if(demandedFloor == currentFloor) {
+          openDoor = true;
           estado = ESTACIONADO_S;
         } else if(firstU[3]) {
+          openDoor = true;
           estado = ESTACIONADO_S;
         } else {
           estado = MOVENDO_S;
@@ -137,8 +146,10 @@ void estado_ALINHADO_S() {
         break;
       case 4:
         if(demandedFloor == currentFloor) {
+          openDoor = true;
           estado = ESTACIONADO_S;
         } else if(firstU[4]) {
+          openDoor = true;
           estado = ESTACIONADO_S;
         } else {
           estado = MOVENDO_S;
@@ -146,8 +157,10 @@ void estado_ALINHADO_S() {
         break;
       case 5:
         if(demandedFloor == currentFloor) {
+          openDoor = true;
           estado = ESTACIONADO_S;
         } else if(firstU[5]) {
+          openDoor = true;
           estado = ESTACIONADO_S;
         } else {
           estado = MOVENDO_S;
@@ -155,8 +168,10 @@ void estado_ALINHADO_S() {
         break;
       case 6:
         if(demandedFloor == currentFloor) {
+          openDoor = true;
           estado = ESTACIONADO_S;
         } else if(firstU[6]) {
+          openDoor = true;
           estado = ESTACIONADO_S;
         } else {
           estado = MOVENDO_S;
@@ -164,8 +179,10 @@ void estado_ALINHADO_S() {
         break;
       case 7:
         if(demandedFloor == currentFloor) {
+          openDoor = true;
           estado = ESTACIONADO_S;
         } else if(firstU[7]) {
+          openDoor = true;
           estado = ESTACIONADO_S;
         } else {
           estado = MOVENDO_S;
@@ -173,21 +190,26 @@ void estado_ALINHADO_S() {
         break;
       case 8:
         if(demandedFloor == currentFloor) {
+          openDoor = true;
           estado = ESTACIONADO_S;
         } else if(firstU[8]) {
+          openDoor = true;
           estado = ESTACIONADO_S;
         } else {
           estado = MOVENDO_S;
         }
         break;
       case 9:
+        openDoor = true;
         estado = ESTACIONADO_S;
         break;
       default:
         break;
     }
+    delay(3000);
   } else {
       estado = FIM_S;
+      delay(3000);
   }
 }
 
@@ -195,51 +217,151 @@ void estado_MOVENDO_S() {
   Serial.println("==> MOVENDO_S");
   currentFloor++;
   estado = ALINHADO_S;
+  delay(3000);
 }
 
 void estado_ESTACIONADO_S() {
   Serial.println("==> ESTACIONADO_S");
-  openDoor = true;
-
-  if (emergency) {
-    emergency = false;
-    openDoor = false;
-    estado = ALINHADO_S;
-  } else if (currentFloor == demandedFloor) {
-
-  }
-
-
+  openDoor = false;
   estado = ALINHADO_S;
+  delay(3000);
 }
 
 void estado_FIM_S() {
   Serial.println("==> FIM_S");
   estado = OCIOSO;
-  //estado = ALINHADO_D;
 }
 
 void estado_ALINHADO_D() {
   Serial.println("==> ALINHADO_D");
   estado = ESTACIONADO_D;
-  //estado = MOVENDO_D;
-  //estado = FIM_D;
+  if(emergency) {
+    openDoor = true;
+    estado = ESTACIONADO_D;
+    delay(3000);
+  } else if (hasDemand) {
+    switch (currentFloor) {
+      case 0:
+        estado = MOVENDO_D;
+      case 1:
+        if(demandedFloor == currentFloor) {
+          openDoor = true;
+          estado = ESTACIONADO_D;
+        } else if(firstU[1]) {
+          openDoor = true;
+          estado = ESTACIONADO_D;
+        } else {
+          estado = MOVENDO_D;
+        }
+        break;
+      case 2:
+        if(demandedFloor == currentFloor) {
+          openDoor = true;
+          estado = ESTACIONADO_D;
+        } else if(firstU[2]) {
+          openDoor = true;
+          estado = ESTACIONADO_D;
+        } else {
+          estado = MOVENDO_D;
+        }
+        break;
+      case 3:
+        if(demandedFloor == currentFloor) {
+          openDoor = true;
+          estado = ESTACIONADO_D;
+        } else if(firstU[3]) {
+          openDoor = true;
+          estado = ESTACIONADO_D;
+        } else {
+          estado = MOVENDO_D;
+        }
+        break;
+      case 4:
+        if(demandedFloor == currentFloor) {
+          openDoor = true;
+          estado = ESTACIONADO_D;
+        } else if(firstU[4]) {
+          openDoor = true;
+          estado = ESTACIONADO_D;
+        } else {
+          estado = MOVENDO_D;
+        }
+        break;
+      case 5:
+        if(demandedFloor == currentFloor) {
+          openDoor = true;
+          estado = ESTACIONADO_D;
+        } else if(firstU[5]) {
+          openDoor = true;
+          estado = ESTACIONADO_D;
+        } else {
+          estado = MOVENDO_D;
+        }
+        break;
+      case 6:
+        if(demandedFloor == currentFloor) {
+          openDoor = true;
+          estado = ESTACIONADO_D;
+        } else if(firstU[6]) {
+          openDoor = true;
+          estado = ESTACIONADO_D;
+        } else {
+          estado = MOVENDO_D;
+        }
+        break;
+      case 7:
+        if(demandedFloor == currentFloor) {
+          openDoor = true;
+          estado = ESTACIONADO_D;
+        } else if(firstU[7]) {
+          openDoor = true;
+          estado = ESTACIONADO_D;
+        } else {
+          estado = MOVENDO_D;
+        }
+        break;
+      case 8:
+        if(demandedFloor == currentFloor) {
+          openDoor = true;
+          estado = ESTACIONADO_D;
+        } else if(firstU[8]) {
+          openDoor = true;
+          estado = ESTACIONADO_D;
+        } else {
+          estado = MOVENDO_D;
+        }
+        break;
+      case 9:
+        estado = MOVENDO_D;
+        break;
+      default:
+        break;
+    }
+    delay(3000);
+  } else {
+      estado = FIM_D;
+      delay(3000);
+  }
+
 }
 
 void estado_MOVENDO_D() {
   Serial.println("==> MOVENDO_D");
+  currentFloor--;
   estado = ALINHADO_D;
+  delay(3000);
 }
 
 void estado_ESTACIONADO_D() {
   Serial.println("==> ESTACIONADO_D");
+  openDoor = false;
   estado = ALINHADO_D;
+  delay(3000);
 }
 
 void estado_FIM_D() {
   Serial.println("==> FIM_D");
   estado = OCIOSO;
-  //estado = ALINHADO_S;
 }
 
 //-----------------------------------------------------------------
@@ -370,34 +492,34 @@ void int_botao_elevador() {
 
  switch (codigo) {
     case 40:
-      floor = true;
+      andar_elevador[0] = true;
       break;
     case 77:
-      first = true;
+      andar_elevador[1] = true;
       break;
     case 112:
-      second = true;
+      andar_elevador[2] = true;
       break;
     case 144:
-      third = true;
+      andar_elevador[3] = true;
       break;
     case 173:
-      fourth = true;
+      andar_elevador[4] = true;
       break;
     case 201:
-      fifth = true;
+      andar_elevador[5] = true;
       break;
     case 227:
-      sixth = true;
+      andar_elevador[6] = true;
       break;
     case 252:
-      seventh = true;
+      andar_elevador[7] = true;
       break;
     case 275:
-      eighth = true;
+      andar_elevador[8] = true;
       break;
     case 296:
-      ninth = true;
+      andar_elevador[9] = true;
       break;
     case 317:
       door = true;
@@ -455,5 +577,5 @@ void loop() {
     default: Serial.println("ESTADO INVÁLIDO");
   }
 
-  delay(1000); // apenas para teste inicial da máquina de estados
+  // delay(1000); // apenas para teste inicial da máquina de estados
 }

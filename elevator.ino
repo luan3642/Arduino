@@ -1,42 +1,36 @@
 #include <Adafruit_NeoPixel.h>
 
-enum { INOPERANTE,
-       OCIOSO,
-       ALINHADO_S,
-       MOVENDO_S,
-       ESTACIONADO_S,
-       FIM_S,
-       ALINHADO_D,
-       MOVENDO_D,
-       ESTACIONADO_D,
-       FIM_D} estado = INOPERANTE;
+// VARIAVEIS GLOBAIS
+//-----------------------------------------------------------------
 
 // Flags de controler - Andares
-bool floorU[9] = [false,
-                  false,
-                  false,
-                  false,
-                  false,
-                  false,
-                  false,
-                  false,
-                  false];
+bool floorU[10] = { false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false};
 
-bool floorD[9] = [false,
-                  false,
-                  false,
-                  false,
-                  false,
-                  false,
-                  false,
-                  false,
-                  false];
+bool floorD[10] = { false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false};
 
 int currentFloor = 0;
 int demandedFloor = 0;
 
 // Flags de controler - Elevador
-bool andar_elevador[10] = [ false,
+bool andar_elevador[10] = { false,
                             false,
                             false,
                             false,
@@ -45,7 +39,7 @@ bool andar_elevador[10] = [ false,
                             false,
                             false,
                             false,
-                            false];
+                            false};
 
 bool on = true;
 
@@ -53,8 +47,6 @@ bool door = false;
 bool emergency = false;
 
 bool openDoor = false;
-
-bool hasDemand = false;
 
 // Strip
 const byte PIN_STRIP = 7;  // input pin Neopixel is attached to
@@ -77,6 +69,80 @@ const byte LED_VERMELHO = 8;
 const byte LED_AZUL = 9;
 const byte LED_AMARELO = 10;
 
+// Enum de estados
+//-----------------------------------------------------------------
+enum { INOPERANTE,
+       OCIOSO,
+       ALINHADO_S,
+       MOVENDO_S,
+       ESTACIONADO_S,
+       FIM_S,
+       ALINHADO_D,
+       MOVENDO_D,
+       ESTACIONADO_D,
+       FIM_D} estado = INOPERANTE;
+
+// Funcoes de controle mudança de estado
+//-----------------------------------------------------------------
+bool ha_destino(int andar) {
+  return andar_elevador[andar];
+}
+
+bool ha_chamada_S(int andar) {
+  return floorU[andar];
+}
+
+bool ha_chamada_D(int andar) {
+  return floorD[andar];
+}
+
+bool ha_demanda_acima(int andar) {
+  for(int i=andar+1;i<10;i++) {
+    if(floorU[i] || floorD[i]) {
+      return true;
+    }
+  }
+  return false;
+}
+
+bool ha_demanda_abaixo(int andar) {
+  for(int i=andar-1;i>=0;i--) {
+    if(floorU[i] || floorD[i]) {
+      return true;
+    }
+  }
+  return false;
+}
+
+bool ha_demanda() {
+  for(int i=0;i<10;i++) {
+    if (floorD[i] || floorU[i] || andar_elevador[i]) {
+      return true;
+    }
+  }
+  return false;
+}
+
+bool ha_emergencia() {
+  return emergency;
+}
+
+void desmarcar_chamadaS(int andar) {
+  floorU[andar] = false;
+}
+
+void desmarcar_chamadaD(int andar) {
+  floorD[andar] = false;
+}
+
+void desmarcar_destino(int andar) {
+  andar_elevador[andar] = false;
+}
+
+void desmarcar_emergencia() {
+  emergency = false;
+}
+
 // Funcoes de estados
 //-----------------------------------------------------------------
 
@@ -88,8 +154,8 @@ void estado_INOPERANTE() {
 
 void estado_OCIOSO() {
   Serial.println("==> OCIOSO");
-  if(on && hasDemand) {
-    if (currentFloor <= demandedFloor) {
+  if(on && ha_demanda()) {
+    if (demandedFloor >= currentFloor) {
       estado = ALINHADO_S;
       delay(3000);
     } else {
@@ -103,110 +169,12 @@ void estado_OCIOSO() {
 
 void estado_ALINHADO_S() {
   Serial.println("==> ALINHADO_S");
-  if(emergency) {
+  if(ha_chamada_S(currentFloor) || ha_destino(currentFloor) || ha_emergencia()) {
     openDoor = true;
     estado = ESTACIONADO_S;
     delay(3000);
-  } else if (hasDemand) {
-    switch (currentFloor) {
-      case 0:
-        estado = MOVENDO_S;
-      case 1:
-        if(demandedFloor == currentFloor) {
-          openDoor = true;
-          estado = ESTACIONADO_S;
-        } else if(firstU[1]) {
-          openDoor = true;
-          estado = ESTACIONADO_S;
-        } else {
-          estado = MOVENDO_S;
-        }
-        break;
-      case 2:
-        if(demandedFloor == currentFloor) {
-          openDoor = true;
-          estado = ESTACIONADO_S;
-        } else if(firstU[2]) {
-          openDoor = true;
-          estado = ESTACIONADO_S;
-        } else {
-          estado = MOVENDO_S;
-        }
-        break;
-      case 3:
-        if(demandedFloor == currentFloor) {
-          openDoor = true;
-          estado = ESTACIONADO_S;
-        } else if(firstU[3]) {
-          openDoor = true;
-          estado = ESTACIONADO_S;
-        } else {
-          estado = MOVENDO_S;
-        }
-        break;
-      case 4:
-        if(demandedFloor == currentFloor) {
-          openDoor = true;
-          estado = ESTACIONADO_S;
-        } else if(firstU[4]) {
-          openDoor = true;
-          estado = ESTACIONADO_S;
-        } else {
-          estado = MOVENDO_S;
-        }
-        break;
-      case 5:
-        if(demandedFloor == currentFloor) {
-          openDoor = true;
-          estado = ESTACIONADO_S;
-        } else if(firstU[5]) {
-          openDoor = true;
-          estado = ESTACIONADO_S;
-        } else {
-          estado = MOVENDO_S;
-        }
-        break;
-      case 6:
-        if(demandedFloor == currentFloor) {
-          openDoor = true;
-          estado = ESTACIONADO_S;
-        } else if(firstU[6]) {
-          openDoor = true;
-          estado = ESTACIONADO_S;
-        } else {
-          estado = MOVENDO_S;
-        }
-        break;
-      case 7:
-        if(demandedFloor == currentFloor) {
-          openDoor = true;
-          estado = ESTACIONADO_S;
-        } else if(firstU[7]) {
-          openDoor = true;
-          estado = ESTACIONADO_S;
-        } else {
-          estado = MOVENDO_S;
-        }
-        break;
-      case 8:
-        if(demandedFloor == currentFloor) {
-          openDoor = true;
-          estado = ESTACIONADO_S;
-        } else if(firstU[8]) {
-          openDoor = true;
-          estado = ESTACIONADO_S;
-        } else {
-          estado = MOVENDO_S;
-        }
-        break;
-      case 9:
-        openDoor = true;
-        estado = ESTACIONADO_S;
-        break;
-      default:
-        break;
-    }
-    delay(3000);
+  } else if (ha_demanda_acima(currentFloor)) {
+    estado = MOVENDO_S;
   } else {
       estado = FIM_S;
       delay(3000);
@@ -223,126 +191,34 @@ void estado_MOVENDO_S() {
 void estado_ESTACIONADO_S() {
   Serial.println("==> ESTACIONADO_S");
   openDoor = false;
+  desmarcar_chamadaS(currentFloor);
+  desmarcar_destino(currentFloor);
+  desmarcar_emergencia();
   estado = ALINHADO_S;
   delay(3000);
 }
 
 void estado_FIM_S() {
   Serial.println("==> FIM_S");
-  estado = OCIOSO;
+  if(ha_demanda_abaixo(currentFloor) || ha_chamada_D(currentFloor)) {
+    estado = ALINHADO_D;
+  } else {
+    estado = OCIOSO;
+  }
 }
 
 void estado_ALINHADO_D() {
   Serial.println("==> ALINHADO_D");
-  estado = ESTACIONADO_D;
-  if(emergency) {
+  if(ha_chamada_D(currentFloor) || ha_destino(currentFloor) || ha_emergencia()) {
     openDoor = true;
     estado = ESTACIONADO_D;
     delay(3000);
-  } else if (hasDemand) {
-    switch (currentFloor) {
-      case 0:
-        estado = MOVENDO_D;
-      case 1:
-        if(demandedFloor == currentFloor) {
-          openDoor = true;
-          estado = ESTACIONADO_D;
-        } else if(firstU[1]) {
-          openDoor = true;
-          estado = ESTACIONADO_D;
-        } else {
-          estado = MOVENDO_D;
-        }
-        break;
-      case 2:
-        if(demandedFloor == currentFloor) {
-          openDoor = true;
-          estado = ESTACIONADO_D;
-        } else if(firstU[2]) {
-          openDoor = true;
-          estado = ESTACIONADO_D;
-        } else {
-          estado = MOVENDO_D;
-        }
-        break;
-      case 3:
-        if(demandedFloor == currentFloor) {
-          openDoor = true;
-          estado = ESTACIONADO_D;
-        } else if(firstU[3]) {
-          openDoor = true;
-          estado = ESTACIONADO_D;
-        } else {
-          estado = MOVENDO_D;
-        }
-        break;
-      case 4:
-        if(demandedFloor == currentFloor) {
-          openDoor = true;
-          estado = ESTACIONADO_D;
-        } else if(firstU[4]) {
-          openDoor = true;
-          estado = ESTACIONADO_D;
-        } else {
-          estado = MOVENDO_D;
-        }
-        break;
-      case 5:
-        if(demandedFloor == currentFloor) {
-          openDoor = true;
-          estado = ESTACIONADO_D;
-        } else if(firstU[5]) {
-          openDoor = true;
-          estado = ESTACIONADO_D;
-        } else {
-          estado = MOVENDO_D;
-        }
-        break;
-      case 6:
-        if(demandedFloor == currentFloor) {
-          openDoor = true;
-          estado = ESTACIONADO_D;
-        } else if(firstU[6]) {
-          openDoor = true;
-          estado = ESTACIONADO_D;
-        } else {
-          estado = MOVENDO_D;
-        }
-        break;
-      case 7:
-        if(demandedFloor == currentFloor) {
-          openDoor = true;
-          estado = ESTACIONADO_D;
-        } else if(firstU[7]) {
-          openDoor = true;
-          estado = ESTACIONADO_D;
-        } else {
-          estado = MOVENDO_D;
-        }
-        break;
-      case 8:
-        if(demandedFloor == currentFloor) {
-          openDoor = true;
-          estado = ESTACIONADO_D;
-        } else if(firstU[8]) {
-          openDoor = true;
-          estado = ESTACIONADO_D;
-        } else {
-          estado = MOVENDO_D;
-        }
-        break;
-      case 9:
-        estado = MOVENDO_D;
-        break;
-      default:
-        break;
-    }
-    delay(3000);
+  } else if (ha_demanda_abaixo(currentFloor)) {
+    estado = MOVENDO_D;
   } else {
       estado = FIM_D;
       delay(3000);
   }
-
 }
 
 void estado_MOVENDO_D() {
@@ -355,129 +231,81 @@ void estado_MOVENDO_D() {
 void estado_ESTACIONADO_D() {
   Serial.println("==> ESTACIONADO_D");
   openDoor = false;
+  desmarcar_chamadaD(currentFloor);
+  desmarcar_destino(currentFloor);
+  desmarcar_emergencia();
   estado = ALINHADO_D;
   delay(3000);
 }
 
 void estado_FIM_D() {
   Serial.println("==> FIM_D");
-  estado = OCIOSO;
+  if(ha_demanda_acima(currentFloor) || ha_chamada_S(currentFloor)) {
+    estado = ALINHADO_S;
+  } else {
+    estado = OCIOSO;
+  }
 }
 
 //-----------------------------------------------------------------
 // função para tratamento da interrupção gerada pelo botão do andar
 
 void int_botao_floor() {
-  hasDemand = true;
   int codigo = analogRead(A5);
   switch (codigo) {
     case 40:
       floorU[0] = true;
-      if (!(demandedFloor == currentFloor)) {
-        demandedFloor = 0;
-      }
       break;
     case 77:
-      firstU[1] = true;
-      if (!(demandedFloor == currentFloor)) {
-        demandedFloor = 1;
-      }
+      floorU[1] = true;
       break;
     case 112:
-      firstU[2] = true;
-      if (!(demandedFloor == currentFloor)) {
-        demandedFloor = 2;
-      }
+      floorU[2] = true;
       break;
     case 144:
-      firstU[3] = true;
-      if (!(demandedFloor == currentFloor)) {
-        demandedFloor = 3;
-      }
+      floorU[3] = true;
       break;
     case 173:
-      firstU[4] = true;
-      if (!(demandedFloor == currentFloor)) {
-        demandedFloor = 4;
-      }
+      floorU[4] = true;
       break;
     case 201:
-      firstU[5] = true;
-      if (!(demandedFloor == currentFloor)) {
-        demandedFloor = 5;
-      }
+      floorU[5] = true;
       break;
     case 227:
-      firstU[6] = true;
-      if (!(demandedFloor == currentFloor)) {
-        demandedFloor = 6;
-      }
+      floorU[6] = true;
       break;
     case 252:
-      firstU[7] = true;
-      if (!(demandedFloor == currentFloor)) {
-        demandedFloor = 7;
-      }
+      floorU[7] = true;
       break;
     case 275:
-      firstU[8] = true;
-      if (!(demandedFloor == currentFloor)) {
-        demandedFloor = 8;
-      }
+      floorU[8] = true;
       break;
     case 296:
-      firstD[0] = true;
-      if (!(demandedFloor == currentFloor)) {
-        demandedFloor = 1;
-      }
+      floorD[1] = true;
       break;
     case 317:
-      firstD[1] = true;
-      if (!(demandedFloor == currentFloor)) {
-        demandedFloor = 2;
-      }
+      floorD[2] = true;
       break;
     case 336:
-      firstD[2] = true;
-      if (!(demandedFloor == currentFloor)) {
-        demandedFloor = 3;
-      }
+      floorD[3] = true;
       break;
     case 355:
-      firstD[3] = true;
-      if (!(demandedFloor == currentFloor)) {
-        demandedFloor = 4;
-      }
+      floorD[4] = true;
       break;
     case 372:
-      firstD[4] = true;
-      if (!(demandedFloor == currentFloor)) {
-        demandedFloor = 5;
-      }
+      floorD[5] = true;
       break;
     case 388:
-      firstD[5] = true;
-      if (!(demandedFloor == currentFloor)) {
-        demandedFloor = 6;
-      }
+      floorD[6] = true;
       break;
     case 404:
-      firstD[6] = true;
-      if (!(demandedFloor == currentFloor)) {
-        demandedFloor = 7;
-      }
+      floorD[7] = true;
       break;
     case 419:
-      firstD[7] = true;
-      if (!(demandedFloor == currentFloor)) {
-        demandedFloor = 8;
-      }
+      floorD[8] = true;
       break;
     case 433:
-      firstD[8] = true;
-      if (!(demandedFloor == currentFloor)) {
-        demandedFloor = 9;
-      }
+      floorD[9] = true;
       break;
   }
 }
@@ -486,7 +314,6 @@ void int_botao_floor() {
 // função para tratamento da interrupção gerada pelo botão do elevador
 
 void int_botao_elevador() {
-  hasDemand = true;
   int codigo = analogRead(A0);
   Serial.println(codigo);
 
@@ -557,13 +384,7 @@ void setup() {
 //--------------------------------------------------------
 
 void loop() {
-  Serial.print("Entrando no loop ");
-  Serial.print("[");
-  Serial.print(estado);
-  Serial.print("] ");
-
-  switch (estado)
-  {
+  switch (estado) {
     case INOPERANTE: estado_INOPERANTE(); break;
     case OCIOSO: estado_OCIOSO(); break;
     case ALINHADO_S: estado_ALINHADO_S(); break;
@@ -576,6 +397,4 @@ void loop() {
     case FIM_D: estado_FIM_D(); break;
     default: Serial.println("ESTADO INVÁLIDO");
   }
-
-  // delay(1000); // apenas para teste inicial da máquina de estados
 }

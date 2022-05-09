@@ -152,7 +152,7 @@ void desmarcar_emergencia() {
 //-----------------------------------------------------------------
 
 void estado_INOPERANTE() {
-  Serial.prinln("==> INOPERANTE");
+  Serial.println("==> INOPERANTE");
   turnOff(LED_AMARELO);
   if(on) {
     estado = OCIOSO;

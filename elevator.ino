@@ -76,6 +76,16 @@ enum { INOPERANTE,
        ESTACIONADO_D,
        FIM_D} estado = INOPERANTE;
 
+// Funcoes de suporte hardware
+//-----------------------------------------------------------------
+void turnOn(int in) {
+  digitalWrite(in, HIGH);
+}
+
+void turnOff(int in) {
+  digitalWrite(in, LOW);
+}
+
 // Funcoes de controle mudança de estado
 //-----------------------------------------------------------------
 bool ha_destino(int andar) {
@@ -135,12 +145,15 @@ void desmarcar_destino(int andar) {
 
 void desmarcar_emergencia() {
   emergency = false;
+  turnOff(LED_VERMELHO);
 }
 
 // Funcoes de estados
 //-----------------------------------------------------------------
 
 void estado_INOPERANTE() {
+  Serial.prinln("==> INOPERANTE");
+  turnOff(LED_AMARELO);
   if(on) {
     estado = OCIOSO;
   }
@@ -148,6 +161,7 @@ void estado_INOPERANTE() {
 
 void estado_OCIOSO() {
   Serial.println("==> OCIOSO");
+  turnOn(LED_AMARELO);
 
   pixels.setPixelColor(currentFloor, pixels.Color(0, 0, 255));
   pixels.show();
@@ -167,6 +181,7 @@ void estado_OCIOSO() {
 
 void estado_ALINHADO_S() {
   Serial.println("==> ALINHADO_S");
+  turnOff(LED_AZUL);
 
   pixels.setPixelColor(currentFloor, pixels.Color(0, 0, 255));
   pixels.show();
@@ -185,6 +200,7 @@ void estado_ALINHADO_S() {
 
 void estado_ESTACIONADO_S() {
   Serial.println("==> ESTACIONADO_S");
+  turnOn(LED_AZUL);
 
   pixels.setPixelColor(currentFloor, pixels.Color(0, 0, 255));
   pixels.show();
@@ -231,6 +247,7 @@ void estado_FIM_S() {
 
 void estado_ALINHADO_D() {
   Serial.println("==> ALINHADO_D");
+  turnOff(LED_AZUL);
 
   pixels.setPixelColor(currentFloor, pixels.Color(0, 0, 255));
   pixels.show();
@@ -249,6 +266,7 @@ void estado_ALINHADO_D() {
 
 void estado_ESTACIONADO_D() {
   Serial.println("==> ESTACIONADO_D");
+  turnOn(LED_AZUL);
 
   pixels.setPixelColor(currentFloor, pixels.Color(0, 0, 255));
   pixels.show();
@@ -405,6 +423,7 @@ void int_botao_elevador() {
       break;
     case 372:
       emergency = true;
+      turnOn(LED_VERMELHO);
       break;
   }
 }

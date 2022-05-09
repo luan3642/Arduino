@@ -53,12 +53,6 @@ const byte PIN_STRIP = 7;  // input pin Neopixel is attached to
 const byte NUMPIXELS = 10; // number of neopixels in Ring
 Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, PIN_STRIP, NEO_GRB + NEO_KHZ800);
 
-int delayval = 200; // timing delay
-
-int redColor = 0;
-int greenColor = 0;
-int blueColor = 255;
-
 // Floor button
 const byte PORTA_INTERRUPCAO_BOTOES_ANDAR = 2;
 // Elevator button
@@ -154,6 +148,10 @@ void estado_INOPERANTE() {
 
 void estado_OCIOSO() {
   Serial.println("==> OCIOSO");
+
+  pixels.setPixelColor(currentFloor, pixels.Color(0, 0, 255));
+  pixels.show();
+
   if(on && ha_demanda()) {
     if (demandedFloor >= currentFloor) {
       estado = ALINHADO_S;
@@ -169,6 +167,10 @@ void estado_OCIOSO() {
 
 void estado_ALINHADO_S() {
   Serial.println("==> ALINHADO_S");
+
+  pixels.setPixelColor(currentFloor, pixels.Color(0, 0, 255));
+  pixels.show();
+
   if(ha_chamada_S(currentFloor) || ha_destino(currentFloor) || ha_emergencia()) {
     openDoor = true;
     estado = ESTACIONADO_S;
@@ -181,15 +183,12 @@ void estado_ALINHADO_S() {
   }
 }
 
-void estado_MOVENDO_S() {
-  Serial.println("==> MOVENDO_S");
-  currentFloor++;
-  estado = ALINHADO_S;
-  delay(3000);
-}
-
 void estado_ESTACIONADO_S() {
   Serial.println("==> ESTACIONADO_S");
+
+  pixels.setPixelColor(currentFloor, pixels.Color(0, 0, 255));
+  pixels.show();
+
   openDoor = false;
   desmarcar_chamadaS(currentFloor);
   desmarcar_destino(currentFloor);
@@ -198,8 +197,31 @@ void estado_ESTACIONADO_S() {
   delay(3000);
 }
 
+void estado_MOVENDO_S() {
+  Serial.println("==> MOVENDO_S");
+
+  pixels.setPixelColor(currentFloor+1, pixels.Color(0, 0, 255));
+  pixels.show();
+  delay(1000);
+  pixels.setPixelColor(currentFloor+1, pixels.Color(0, 0, 0));
+  pixels.show();
+  delay(1000);
+  pixels.setPixelColor(currentFloor+1, pixels.Color(0, 0, 255));
+  pixels.show();
+  delay(1000);
+  pixels.setPixelColor(currentFloor, pixels.Color(0, 0, 0));
+  pixels.show();
+
+  currentFloor++;
+  estado = ALINHADO_S;
+}
+
 void estado_FIM_S() {
   Serial.println("==> FIM_S");
+
+  pixels.setPixelColor(currentFloor, pixels.Color(0, 0, 255));
+  pixels.show();
+
   if(ha_demanda_abaixo(currentFloor) || ha_chamada_D(currentFloor)) {
     estado = ALINHADO_D;
   } else {
@@ -209,6 +231,10 @@ void estado_FIM_S() {
 
 void estado_ALINHADO_D() {
   Serial.println("==> ALINHADO_D");
+
+  pixels.setPixelColor(currentFloor, pixels.Color(0, 0, 255));
+  pixels.show();
+
   if(ha_chamada_D(currentFloor) || ha_destino(currentFloor) || ha_emergencia()) {
     openDoor = true;
     estado = ESTACIONADO_D;
@@ -221,15 +247,12 @@ void estado_ALINHADO_D() {
   }
 }
 
-void estado_MOVENDO_D() {
-  Serial.println("==> MOVENDO_D");
-  currentFloor--;
-  estado = ALINHADO_D;
-  delay(3000);
-}
-
 void estado_ESTACIONADO_D() {
   Serial.println("==> ESTACIONADO_D");
+
+  pixels.setPixelColor(currentFloor, pixels.Color(0, 0, 255));
+  pixels.show();
+
   openDoor = false;
   desmarcar_chamadaD(currentFloor);
   desmarcar_destino(currentFloor);
@@ -238,8 +261,31 @@ void estado_ESTACIONADO_D() {
   delay(3000);
 }
 
+void estado_MOVENDO_D() {
+  Serial.println("==> MOVENDO_D");
+
+  pixels.setPixelColor(currentFloor-1, pixels.Color(0, 0, 255));
+  pixels.show();
+  delay(1000);
+  pixels.setPixelColor(currentFloor-1, pixels.Color(0, 0, 0));
+  pixels.show();
+  delay(1000);
+  pixels.setPixelColor(currentFloor-1, pixels.Color(0, 0, 255));
+  pixels.show();
+  delay(1000);
+  pixels.setPixelColor(currentFloor, pixels.Color(0, 0, 0));
+  pixels.show();
+
+  currentFloor--;
+  estado = ALINHADO_D;
+}
+
 void estado_FIM_D() {
   Serial.println("==> FIM_D");
+
+  pixels.setPixelColor(currentFloor, pixels.Color(0, 0, 255));
+  pixels.show();
+
   if(ha_demanda_acima(currentFloor) || ha_chamada_S(currentFloor)) {
     estado = ALINHADO_S;
   } else {
